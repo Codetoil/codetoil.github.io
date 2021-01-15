@@ -113,18 +113,18 @@ var createScene = function () {
     wall.material = new BABYLON.StandardMaterial("wallMat", scene);
     wall.material.diffuseColor = new BABYLON.Color3(1, 1, 1);
     wall.material.backFaceCulling = false;
-    wall.position = new BABYLON.Vector3(3, -10, -15);
+    wall.position = new BABYLON.Vector3(3, -2, -15);
     wall.rotation = new BABYLON.Vector3(0, Math.PI / 2, 0);
-    wall.physicsImpostor = new BABYLON.PhysicsImpostor( wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.15 }, scene);
+    wall.physicsImpostor = new BABYLON.PhysicsImpostor( wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.3 }, scene);
     walls.push(wall);
 
     var wall2 = BABYLON.Mesh.CreatePlane("wall2", 15.0, scene);
     wall2.material = wall.material;
     wall2.material.diffuseColor = new BABYLON.Color3(1, 1, 1);
     wall2.material.backFaceCulling = false;
-    wall2.position = new BABYLON.Vector3(7, -10, -15);
+    wall2.position = new BABYLON.Vector3(7, -2, -15);
     wall2.rotation = new BABYLON.Vector3(0, Math.PI / 2, 0);
-    wall2.physicsImpostor = new BABYLON.PhysicsImpostor( wall2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.15 }, scene);
+    wall2.physicsImpostor = new BABYLON.PhysicsImpostor( wall2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.3 }, scene);
     walls.push(wall2);
 
     // Enable Collisions
@@ -162,9 +162,16 @@ var createScene = function () {
         ch.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(vel.x, 28, vel.z));
     }
 
+    var canWallJump = true;
+    var lastWall = null;
     var wallJumpCh = function(ch, wall) {
-        ch.physicsImpostor.setLinearVelocity(ch.getDirection(new BABYLON.Vector3(0, 30, -60)));
-        ch.setDirection(ch.getDirection(new BABYLON.Vector3(0, 0, -60)));
+        if (lastWall !== wall)
+        {
+            ch.physicsImpostor.setLinearVelocity(ch.getDirection(new BABYLON.Vector3(0, 30, -60)));
+            ch.setDirection(ch.getDirection(new BABYLON.Vector3(0, 0, -60)));
+            canWallJump = false;
+            lastWall = wall;
+        }
     }
 
     scene.onBeforeRenderObservable.add(function(evt) {
@@ -177,28 +184,44 @@ var createScene = function () {
                 if (onGround) {
                     jumpCh(box);
                 }
-                onWall.forEach(e => {
-                    if (e[1])
-                    {
-                        wallJumpCh(box, e[0]);
-                    }
-                });
-            } 
+                if (canWallJump && !onGround) {
+                    onWall.forEach(e => {
+                        if (e[1])
+                        {
+                            wallJumpCh(box, e[0]);
+                        }
+                    });
+                }
+            }
+            else {
+                canWallJump = true;
+            }
+            if (onGround) {
+                lastWall = null;
+            }
         } 
         if (deviceSourceManager.getDeviceSource(BABYLON.DeviceType.Generic)) { 
             var gamepadSource = deviceSourceManager.getDeviceSource(BABYLON.DeviceType.Generic); 
             moveCh(box, -gamepadSource.getInput(15), gamepadSource.getInput(14), onGround, onWall); 
             if (gamepadSource.getInput(1) == 1 || gamepadSource.getInput(2) == 1) { 
                 if (onGround) {
-                    jumpCh(box); 
+                    jumpCh(box);
                 }
-                onWall.forEach(e => {
-                    if (e[1])
-                    {
-                        wallJumpCh(box, e[0]);
-                    }
-                });
-            } 
+                if (canWallJump && !onGround) {
+                    onWall.forEach(e => {
+                        if (e[1])
+                        {
+                            wallJumpCh(box, e[0]);
+                        }
+                    });
+                }
+            }
+            else {
+                canWallJump = true;
+            }
+            if (onGround) {
+                lastWall = null;
+            }
         }
         var vel = box.physicsImpostor.getLinearVelocity();
         var velxz = new BABYLON.Vector3(vel.x, 0, vel.z);
@@ -212,6 +235,7 @@ var createScene = function () {
             vely = 50 * (vely === 0 ? 0 : (vely > 0 ? 1 : -1));
         }
         box.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(velxz.x, vely, velxz.z));
+        box.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
     }); 
     var meshesColliderList = []; 
     for (var i = 1; i < scene.meshes.length; i++) { 
