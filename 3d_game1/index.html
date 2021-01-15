@@ -207,9 +207,9 @@ var createScene = function () {
             velxz = velxz.normalize().scale(10);
         }
         var vely = vel.y;
-        if (Math.abs(vely) > 100)
+        if (Math.abs(vely) > 50)
         {
-            vely = 100 * (vely === 0 ? 0 : (vely > 0 ? 1 : -1));
+            vely = 50 * (vely === 0 ? 0 : (vely > 0 ? 1 : -1));
         }
         box.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(velxz.x, vely, velxz.z));
     }); 
