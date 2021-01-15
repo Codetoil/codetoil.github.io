@@ -81,7 +81,7 @@ var createScene = function () {
     //Simple crate 
     var box = BABYLON.MeshBuilder.CreateBox("crate", {width: 1.5, height: 2, depth: 1.5}, scene);
     box.material = new BABYLON.StandardMaterial("Mat", scene);
-    box.material.diffuseTexture = new BABYLON.Texture("textures/crate.png", scene);
+    box.material.diffuseTexture = new BABYLON.Texture("https://codetoil.github.io/3d_game1/textures/crate.png", scene);
     box.material.diffuseTexture.hasAlpha = true;
     box.position = new BABYLON.Vector3(5, -9, -10);
     box.physicsImpostor = new BABYLON.PhysicsImpostor( box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1 }, scene);
